@@ -80,15 +80,15 @@ class Node<ActionType> {
                 GameState<ActionType> newState = state.takeAction(action);
                 Node<ActionType> newChild = new Node<>(newState, this);
                 children.put(action, newChild);
-                setFullyExplored();
+                newChild.setFullyExplored();
                 return newChild;
             }
         }
         return null;
     }
 
-    private void setFullyExplored() {
-        if(state.getLegalActions().size() == 1){
+    public void setFullyExplored() {
+        if(state.isTerminal()){
             this.fullyExplored = true;
             if(parent != null) {
                 parent.setFullyExplored();

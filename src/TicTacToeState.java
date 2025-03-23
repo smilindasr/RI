@@ -19,6 +19,17 @@ class TicTacToeState implements GameState<Integer> {
         return board;
     }
 
+    @Override
+    public int getEmptyCells() {
+        int initialEmptyCells = 0;
+        for (char c : board) {
+            if (c == ' ') {
+                initialEmptyCells++;
+            }
+        }
+        return initialEmptyCells;
+    }
+
     // GameState interface implementation
     @Override
     public boolean isTerminal() {
@@ -51,8 +62,8 @@ class TicTacToeState implements GameState<Integer> {
     @Override
     public double getReward(int player) {
         int winner = getWinner();
-        if (winner == -1) return 0.5; // Draw
-        return (winner == player) ? 1.0 : 0.0;
+        if (winner == -1) return 0.0; // Draw
+        return (winner == player) ? 1.0 : -1.0;
     }
 
     // Helper methods
@@ -73,6 +84,22 @@ class TicTacToeState implements GameState<Integer> {
         if (checkTriple(0, 4, 8)) return board[0] == 'X' ? 0 : 1;
         if (checkTriple(2, 4, 6)) return board[2] == 'X' ? 0 : 1;
         return -1; // No winner
+    }
+
+    @Override
+    public void printWinner() {
+        if(getWinner() == -1) {
+            System.out.println("It's a tie!, Current player: " + getCurrentPlayerName());
+        } else if(getWinner() == 0) {
+            System.out.println("Winner is X, Current player: " + getCurrentPlayerName());
+        } else {
+            System.out.println("Winner is O, Current player: " + getCurrentPlayerName());
+        }
+
+    }
+
+    private String getCurrentPlayerName() {
+        return currentPlayer == 0 ? "X": "0";
     }
 
     private boolean checkTriple(int a, int b, int c) {

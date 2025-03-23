@@ -67,26 +67,19 @@ public class MCTS<ActionType> {
             }
         }
 
-
         // Simulation
-        double reward = simulate(node.state);
+        double reward = simulate(initialState, node.state);
 
         // Backpropagation
         backpropagate(node, reward);
     }
 
-    double simulate(GameState<ActionType> state) {
+    double simulate(GameState<ActionType> initialState, GameState<ActionType> state) {
         GameState<ActionType> currentState = state;
         Random random = new Random();
         int depth = 0;
-        char[] board = currentState.getBoard();
-        int initialEmptyCells = 0;
-        for (char c : board) {
-            if (c == ' ') {
-                initialEmptyCells++;
-            }
-        }
-        int maxDepth = Math.max(initialEmptyCells, 1);
+
+        int maxDepth = Math.max(state.getEmptyCells(), 1);
 
         while (!currentState.isTerminal()) {
             List<ActionType> actions = currentState.getLegalActions();
@@ -94,72 +87,70 @@ public class MCTS<ActionType> {
             currentState = currentState.takeAction(actions.get(random.nextInt(actions.size())));
             depth++;
         }
+
         double baseReward = currentState.getReward(state.getCurrentPlayer());
+        if(initialState.getLegalActions().size() <=5) {
+            System.out.println("Base reward: " + baseReward);
+            currentState.printWinner();
+            System.out.println("node current state: \n" + currentState + "\n\n");
+        }
         //return baseReward;
-        return calculateDepthWeightedReward(baseReward, depth, maxDepth);
+        return calculateReward(baseReward, depth, maxDepth);
     }
 
-    private double calculateDepthWeightedReward(double baseReward, int depth, int maxDepth) {
-        // Ensure depth is within valid range
-        depth = Math.max(0, Math.min(depth, maxDepth));
+    public double calculateReward(double baseReward, int depth, int maxDepth) {
+        // Normalize depth between 0 (fastest) and 1 (slowest)
+        double normalizedDepth = Math.min(1.0, Math.max(0.0, depth / (double) maxDepth));
 
-        // Calculate normalized depth (0 = immediate, 1 = max depth)
-        double normalizedDepth = (double) depth / maxDepth;
-
-        // Weight rewards based on depth
-        if (baseReward == 1.0) { // Win
-            // Immediate wins are better (reward decreases with depth)
-            return 1.0 - 0.5 * normalizedDepth;
-        } else if (baseReward == 0.0) { // Loss
-            // Later losses are less bad (reward increases with depth)
-            return 0.5 * normalizedDepth;
-        } else { // Draw
-            // Neutral reward for draws
-            return 0.5;
+        // Win: Exponential decay from 1.0 to 0.2
+        if (baseReward == 1.0) {
+            return 0.8 * Math.exp(-1.6 * normalizedDepth) + 0.2;
+        }
+        // Draw: Neutral value
+        else if (baseReward == 0.0) {
+            return 0.0;
+        }
+        // Loss: Linear penalty from -1.0 to -0.2
+        else {
+            return -1.0 + 0.8 * normalizedDepth;
         }
     }
 
+
     private void backpropagate(Node<ActionType> node, double reward) {
-        // Add small epsilon to prevent division by zero
-        double epsilon = 1e-8;
-
         while (node != null) {
-            // Update visit count
             node.visitCount += 1;
-
-            // Update total value
             node.totalValue += reward;
 
             // Invert reward for parent's perspective
-            reward = 1 - reward;
-
-            // Add epsilon to prevent NaN from 0/0
-            reward = Math.max(0.0, Math.min(1.0, reward)) + epsilon;
+            reward = -reward; // Flip sign for opponent's perspective
 
             // Move to parent node
             node = node.parent;
         }
-
     }
 
     public static <ActionType> ActionType getBestAction(Node<ActionType> rootNode) {
         ActionType bestAction = null;
         Node<ActionType> bestValue = null;
-        double maxValue = -1;
+        double minValue = Double.POSITIVE_INFINITY;
 
         for (Map.Entry<ActionType, Node<ActionType>> entry : rootNode.children.entrySet()) {
             System.out.println("\nAction Value: " + entry.getValue().totalValue);
             System.out.println("\nAction Visits: " + entry.getValue().visitCount);
+            double valueVisitRatio = entry.getValue().totalValue / entry.getValue().visitCount;
             System.out.println("Action key: " + entry.getKey());
-            if (entry.getValue().totalValue > maxValue) {
-                maxValue = entry.getValue().totalValue;
+            if (valueVisitRatio < minValue) {
+                minValue = valueVisitRatio;
                 bestAction = entry.getKey();
                 bestValue = entry.getValue();
             }
         }
         System.out.println("Best value : " + bestValue.totalValue);
         System.out.println("BAction Visit count : " + bestValue.visitCount);
+        System.out.println("Best value : " + minValue);
         System.out.println("Best key : " + bestAction);
+
         return bestAction;
     }
 

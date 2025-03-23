@@ -7,4 +7,6 @@ interface GameState<ActionType> {
     int getCurrentPlayer();
     double getReward(int player);
     char[] getBoard();
+    int getEmptyCells();
+    void printWinner();
 }
