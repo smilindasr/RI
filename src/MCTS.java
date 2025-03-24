@@ -79,7 +79,7 @@ public class MCTS<ActionType> {
         Random random = new Random();
         int depth = 0;
 
-        int maxDepth = Math.max(state.getEmptyCells(), 1);
+        int maxDepth = Math.max(state.getMaximumPlays(), 1);
 
         while (!currentState.isTerminal()) {
             List<ActionType> actions = currentState.getLegalActions();

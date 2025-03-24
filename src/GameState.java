@@ -6,7 +6,6 @@ interface GameState<ActionType> {
     GameState<ActionType> takeAction(ActionType action);
     int getCurrentPlayer();
     double getReward(int player);
-    char[] getBoard();
-    int getEmptyCells();
+    int getMaximumPlays(); // in the case of tic-tac-toe, this is the number of empty cells
     void printWinner();
 }

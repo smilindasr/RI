@@ -20,7 +20,7 @@ class TicTacToeState implements GameState<Integer> {
     }
 
     @Override
-    public int getEmptyCells() {
+    public int getMaximumPlays() {
         int initialEmptyCells = 0;
         for (char c : board) {
             if (c == ' ') {

@@ -21,7 +21,7 @@ public class Main {
 
             if (currentState.getCurrentPlayer() == 0) { // AI's turn
                 System.out.println("\nAI is thinking...");
-                Node<Integer> rootNode = mcts.run(currentState, 2000);
+                Node<Integer> rootNode = mcts.run(currentState, 20);
                 Integer bestMove = MCTS.getBestAction(rootNode);
                 currentState = currentState.takeAction(bestMove);
                 System.out.println("AI plays at position: " + bestMove);

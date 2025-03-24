@@ -47,7 +47,7 @@ class Node<ActionType> {
             if (child.visitCount == 0) {
                 score = Double.POSITIVE_INFINITY;
             } else {
-                double exploitation = child.totalValue/ child.visitCount;
+                double exploitation = -1 * child.totalValue/ child.visitCount;
                 double exploration = explorationWeight *
                         Math.sqrt(Math.log(this.visitCount) / child.visitCount);
                 score = exploitation + exploration;
