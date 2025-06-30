@@ -1,3 +1,4 @@
+import main.MCTS;
 import org.junit.Test;
 
 public class MCTSTest {
