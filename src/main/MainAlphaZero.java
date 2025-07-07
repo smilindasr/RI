@@ -21,7 +21,13 @@ public class MainAlphaZero {
             }
 
         }*/
-        mcts.selfPlayGame(currentState, 100, 100, 1, new NeuralNetwork<>());
+        NeuralNetwork nn = new NeuralNetwork<>();
+        for(int i=0; i< 1; i++) {
+            List<TrainingExample<Integer>> trainingExamples1 = mcts.selfPlayGame(currentState, 100, 100, 1, nn);
+            //WriteFile.writeTrainingExamplesToJSONL(i+"training_dataRI.jsonl", trainingExamples, false);
+            //nn.train(trainingExamples1);
+            //nn.load_model();
+        }
         //WriteFile.writeTrainingExamplesToJSONL("training_data.jsonl", trainingExamples, false);
     }
 }

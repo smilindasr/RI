@@ -48,10 +48,6 @@ public class MCTSAlpha<ActionType extends Comparable> {
             System.err.println("Executor shutdown interrupted: " + e.getMessage());
         }
 
-      //  writeTrainingExamplesToCSV(trainingExamples);
-       // nn.analyse_train_data(trainingExamples);
-      //  nn.analyze_model_complexity(trainingExamples);
-       // nn.train(trainingExamples);
         return trainingExamples;
     }
 

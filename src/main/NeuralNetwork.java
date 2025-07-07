@@ -44,24 +44,42 @@ public class NeuralNetwork<ActionType> {
     }
 
     public void train(List<TrainingExample<ActionType>> examples) {
-        String serializedExamples = serializeExamples(examples);
-        ProcessBuilder processBuilder = new ProcessBuilder("python", "/Users/milindas/workspace/PythonProject1/train2.py", serializedExamples);
-        processBuilder.redirectErrorStream(true);
-        Process process = null;
-        StringBuilder result = new StringBuilder();
         try {
-            process = processBuilder.start();
-            InputStream inputStream = process.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
+            HttpPost request = new HttpPost(BASE_URL + "/train");
+            String jsonData = objectMapper.writeValueAsString(examples);
+            request.setEntity(new StringEntity(jsonData, ContentType.APPLICATION_JSON));
 
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line); // or handle the output as needed
-                result.append(line);
+            try (CloseableHttpResponse response = httpClient.execute(request)) {
+                if (response.getCode() != 200) {
+                    throw new IOException("Prediction request failed with status: " + response.getCode());
+                }
+
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
+                    String output = reader.lines().collect(Collectors.joining("\n"));
+                    System.out.println(output);
+                }
             }
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to make prediction request", e);
+        }
+    }
+
+    public void load_model() {
+        try {
+            HttpPost request = new HttpPost(BASE_URL + "/load-model");
+
+            try (CloseableHttpResponse response = httpClient.execute(request)) {
+                if (response.getCode() != 200) {
+                    throw new IOException("Prediction request failed with status: " + response.getCode());
+                }
+
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
+                    String output = reader.lines().collect(Collectors.joining("\n"));
+                    System.out.println(output);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to make prediction request", e);
         }
     }
 
